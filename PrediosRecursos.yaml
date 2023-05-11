@@ -1,0 +1,257 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: Predio e Recurso CRUD API
+  description: CRUD API para entidades "predio" e "recurso"
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor Local
+
+components:
+  schemas:
+    Predio:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: ID do predio.
+          name:
+            type: string
+            description: Nome do predio.
+          description:
+            type: string
+            description: Descrição do predio.
+          local:
+            type: string
+            description: Local do predio.
+
+    PredioInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Nome do predio.
+        description:
+          type: string
+          description: Descrição do predio.
+        local:
+          type: string
+          description: Local do predio.
+
+    Recurso:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: ID do recurso.
+          name:
+            type: string
+            description: Nome do recurso.
+          status:
+            type: string
+            enum: [DISPONIVEL, MANUTENCAO]
+            description: Status do recurso.
+
+    RecursoInput:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID do recurso.
+        name:
+          type: string
+          description: Nome do recurso.
+        status:
+          type: string
+          enum: [DISPONIVEL, MANUTENCAO]
+          description: Status do recurso.
+
+paths:
+  /predios:
+    get:
+      summary: Get todos os predios
+      operationId: getAllPredios
+      responses:
+        "200":
+          description: Lista de todos os predios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Predio"
+    post:
+      summary: Cria um novo predio
+      operationId: createPredio
+      requestBody:
+        description: Objeto predio a ser criado
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredioInput"
+      responses:
+        "201":
+          description: Predio criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Predio"
+
+  /predios/{name}:
+    parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+    get:
+      summary: Retorna um predio atraves do nome
+      operationId: findByNome
+      responses:
+        "200":
+          description: Predio encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Predio"
+        "404":
+          description: Predio não encontrado
+    put:
+      summary: Atualiza um predio existente atraves do nome
+      operationId: atualizaPredio
+      requestBody:
+        description: Objeto do predio a ser atualizado
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PredioInput"
+      responses:
+        "200":
+          description: Predio alterado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Predio"
+        "404":
+          description: Predio não encontrado
+          
+  /predios/{id}:
+    parameters:
+      - name: id
+        in: path
+        description: ID do predio a ser deletado
+        required: true
+        schema:
+          type: integer
+    delete:
+      summary: Deleta um predio
+      operationId: deleteById
+      responses:
+        "200":
+          description: Predio removido com sucesso
+        "404":
+          description: Predio não encontrado
+
+  /recursos:
+    get:
+      summary: Get todos os recurso
+      operationId: getAllRecursos
+      responses:
+        "200":
+          description: Lista de todos os recursos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recurso"
+    post:
+      summary: Cria um novo recurso
+      operationId: novoRecurso
+      requestBody:
+        description: Objeto recurso a ser criado
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecursoInput"
+      responses:
+        "201":
+          description: Recurso criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Recurso"
+        "404":
+          description: Recurso já existente
+
+    /recursos/{name}:
+      get:
+        summary: Retorna um recurso atraves do nome
+        operationId: findByNome
+        parameters:
+          - in: path
+            name: name
+            description: Nome do recurso a ser retornado
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: Recurso encontrado
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Recurso"
+          "404":
+            description: Recurso não encontrado
+      put:
+        summary: Atualiza um recurso existente atraves do nome
+        operationId: atualizaRecurso
+        parameters:
+          - in: path
+            name: name
+            description: Nome do recurso a ser atualizado
+            required: true
+            schema:
+              type: string
+        requestBody:
+          description: Objeto do recurso a ser atualizado
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecursoInput"
+        responses:
+          "200":
+            description: Recurso alterado com sucesso
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Recurso"
+          "404":
+            description: Recurso não encontrado
+            
+    /recursos/{id}:
+      parameters:
+        - name: id
+          in: path
+          description: ID do recurso a ser deletado
+          required: true
+          schema:
+            type: integer
+      delete:
+        summary: Deleta um recurso
+        operationId: deleteById
+        responses:
+          "200":
+            description: Recurso removido com sucesso
+          "404":
+            description: Recurso não encontrado
