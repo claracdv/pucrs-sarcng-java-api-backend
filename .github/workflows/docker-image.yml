@@ -1,18 +1,36 @@
-name: Docker Image CI
+name: Deploy to EC2
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: <your-ec2-region>
+
+      - name: Set up Docker Compose
+        uses: docker/compose-action@v1
+        with:
+          compose-file: docker-compose.yaml
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t sarcng .
+          docker tag sarcng <your-ecr-repository>:latest
+          docker push <your-ecr-repository>:latest
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i <your-ec2-key.pem> <ec2-user>@<ec2-instance-ip> "docker-compose pull && docker-compose up -d"
